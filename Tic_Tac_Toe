@@ -1,0 +1,174 @@
+import random
+
+#game 1, move #1
+#  o   o   o
+#  o   o   o
+#  o   o   o
+
+
+
+class Board():
+    def __init__(self):
+        self.notturn = 0; #0,1,0,1
+        self.playcomp = ["O","X"]
+        self.position = ""
+        self.aam_board = [];
+        self.acache = [];
+        [self.aam_board.append(['_', '_', '_']) for i in range(3)];
+        self.cMARGIN = 8;
+
+    def play(self):
+        self.chooseplayer();
+        while self.check_win() not in ["WIN","LOSE","TIE"]:
+            if self.check_win() == False:
+                self.makemove();
+
+    def check_win(self):
+        def is_row(self):
+            tempList = []
+            tempSet = set()
+            for i in range(len(self.aam_board)):
+                for j in range(len(self.aam_board[i])):
+                    tempSet.add(self.aam_board[i][j])
+                tempList.append(list(tempSet))
+                tempSet.clear()
+            for i in tempList:
+                if len(i) == 1 and i[0] == self.playcomp[0]:
+                    return "WIN"
+                elif len(i) == 1 and i[0] == self.playcomp[1]:
+                    return "LOSE"
+            return False
+
+        def is_column(self):
+            tempList = []
+            tempSet = set()
+            for i in range(len(self.aam_board)):
+                for j in range(len(self.aam_board[i])):
+                    tempSet.add(self.aam_board[j][i])
+                tempList.append(list(tempSet))
+                tempSet.clear()
+            for i in tempList:
+                if len(i) == 1 and i[0] == self.playcomp[0]:
+                    return "WIN"
+                elif len(i) == 1 and i[0] == self.playcomp[1]:
+                    return "LOSE"
+            return False
+
+        def is_diagonal(self):
+            tempList = []
+            tempSet = set()
+            for i in range(len(self.aam_board)):
+                flip = [i, len(self.aam_board[i]) - 1 - i]
+                for j in range(len(self.aam_board[i])):
+                    tempSet.add(self.aam_board[i][i])
+                    tempList.append(list(tempSet))
+                tempSet.clear()
+
+            for i in range(len(self.aam_board)):
+                flip = [i, len(self.aam_board[i]) - 1 - i]
+                for j in range(len(self.aam_board[i])):
+                    tempSet.add(self.aam_board[i][flip[1]])
+                    tempList.append(list(tempSet))
+                tempSet.clear()
+
+            for i in tempList:
+                if len(i) == 1:
+                    return True
+
+        def is_full(self):
+            temp = ["O","X"];
+            tbool = False
+            for e in self.aam_board:
+                for j in self.aam_board:
+                    if j not in temp:
+                        tbool = True
+            if tbool:
+                return False
+            elif tbool:
+                return "TIE"
+
+        if "WIN" in [is_row(self),is_column(self),is_diagonal(self)]:
+            return "WIN"
+        elif "LOSE" in [is_row(self),is_column(self),is_diagonal(self)]:
+            return "LOSE"
+        elif len(self.acache) ==9:
+            return "TIE"
+        else:
+            return False
+
+
+    def chooseplayer(self):
+        temp = input(f'Enter a valid player O or X >').upper();
+        while True:
+            if temp == self.playcomp[0] or self.playcomp[1] in temp and "not" in temp:
+                return True
+            elif temp == self.playcomp[1] or self.playcomp[0] in temp and "not" in temp:
+                self.playcomp = list(reversed(self.playcomp))
+                return True
+            else:
+                temp = input(f'Incorrect please try again >').upper();
+
+    def makemove(self):
+        if self.notturn == 0 and len(self.acache) <= 9:
+            self.position = self.validateMove("Enter a valid position {0,1,2},{0,1,2}","invalid choice, please try again")  # row 0, column 1
+            if self.position not in self.acache and self.aam_board[self.position[0]][self.position[1]] not in ["O","X"]:
+                self.aam_board[self.position[0]][self.position[1]] = self.playcomp[self.notturn]
+                self.notturn += 1;
+                self.acache.append(self.position);
+                self.__str__();
+            else:
+                print("already occupied please try again")
+        print()
+
+        if self.check_win() != False:
+            print(self.check_win())
+
+        if self.notturn == 1 and len(self.acache) < 9:
+            i = random.randint(0, len(self.aam_board) - 1)
+            j = random.randint(0, len(self.aam_board) - 1)
+            while [i,j] in self.acache and len(self.acache) < 9:
+                i = random.randint(0, len(self.aam_board) - 1)
+                j = random.randint(0, len(self.aam_board) - 1)
+            if [i,j] not in self.acache and self.aam_board[i][j] not in ["O","X"]:
+                self.aam_board[i][j] = self.playcomp[self.notturn]
+                self.notturn = not self.notturn;
+                self.acache.append([i, j])
+                self.__str__();
+            else:
+                print("already occupied please try again")
+        if self.check_win() == "WIN":
+            print(self.check_win())
+        elif self.check_win() == "LOSE":
+            print(self.check_win())
+        elif self.check_win() == "TIE":
+                self.notturn = -1;
+        else:
+            return False
+
+
+    def validateMove(self,s_numString,s_errorString):
+            temp = input(f'{s_numString} >').split(',');
+            while True:
+                try:
+                    if temp == None:
+                        temp = input(f'{s_errorString} >').split(',');
+                    elif len(temp) == 2:
+                        temp = [int(x) for x in temp];
+                        abool = True
+                        return temp
+                except:
+                    print("issue")
+                    temp = None;
+
+    def __str__(self):
+        #len(column) + margin = 3 + 2margin
+        print(" "*(self.cMARGIN//2 +2)+"Column"+" "*(self.cMARGIN//2 +4))
+        for i in range(len(self.aam_board)):
+            for j in range(len(self.aam_board[i])):
+                print(self.aam_board[i][j], end=' ' * self.cMARGIN if j != len(self.aam_board[i]) - 1 else None)
+            if i != len(self.aam_board)-1:
+               print(end='\n'+'\n'*(self.cMARGIN//4))
+
+if __name__ == '__main__':
+    O_gameobj = Board();
+    O_gameobj.play()
